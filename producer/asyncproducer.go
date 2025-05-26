@@ -17,6 +17,7 @@ func AsyncProducer(addr []string, topic, data string) error {
 	cfg.Producer.Flush.Messages = 100                     // 当累积的消息数量达到100条时发送
 	cfg.Producer.Flush.Frequency = 100 * time.Millisecond // 每100毫秒尝试发送一次消息 linger.ms
 	//cfg.Producer.Partitioner = sarama.NewManualPartitioner // 指定手动分区器，在消息体中配置的Partition才会生效
+	//cfg.Producer.Compression = sarama.CompressionSnappy // 压缩
 
 	producer, err := sarama.NewAsyncProducer(addr, cfg)
 	if err != nil {
@@ -54,6 +55,7 @@ func AsyncProducer(addr []string, topic, data string) error {
 	for i := 0; i < 10; i++ {
 		msg.Value = sarama.StringEncoder(fmt.Sprintf("%s-%d", data, i))
 		producer.Input() <- msg
+		slog.Info(fmt.Sprintf("Send %dth data", i))
 		time.Sleep(time.Second)
 	}
 	if err = producer.Close(); err != nil {
