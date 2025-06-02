@@ -45,7 +45,7 @@ func (c *ConsumeHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim
 func ConsumeTopic(addr, topics []string, groupId string) error {
 	cfg := sarama.NewConfig()
 	cfg.Version = sarama.V3_7_1_0
-	cfg.Consumer.Offsets.Initial = sarama.OffsetOldest
+	cfg.Consumer.Offsets.Initial = sarama.OffsetNewest
 	cfg.Consumer.Offsets.AutoCommit.Enable = true
 	cfg.Consumer.Offsets.AutoCommit.Interval = time.Second
 	// 消费者分组分配策略 & Rebalance策略
@@ -78,7 +78,6 @@ func ConsumeTopic(addr, topics []string, groupId string) error {
 				return
 			}
 			slog.Info("Consumer group closed...")
-			return
 		}
 	}()
 

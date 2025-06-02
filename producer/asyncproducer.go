@@ -52,7 +52,7 @@ func AsyncProducer(addr []string, topic, data string) error {
 		//Partition: int32(1), // 指定分区，配合手动分区器使用
 		//Key: sarama.StringEncoder(topic), // 指定key，分区器会对key进行hash获取分区id
 	}
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 50; i++ {
 		msg.Value = sarama.StringEncoder(fmt.Sprintf("%s-%d", data, i))
 		producer.Input() <- msg
 		slog.Info(fmt.Sprintf("Send %dth data", i))

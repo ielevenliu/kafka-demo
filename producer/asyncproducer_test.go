@@ -6,6 +6,6 @@ import (
 )
 
 func TestAsyncProducer(t *testing.T) {
-	err := AsyncProducer([]string{"192.168.1.11:9092"}, "first", "hi")
+	err := AsyncProducer([]string{"192.168.1.11:9092"}, "first", "hello")
 	assert.Equal(t, nil, err)
 }
