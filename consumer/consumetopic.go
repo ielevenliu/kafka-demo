@@ -16,6 +16,8 @@ import (
 type ConsumeHandler struct{}
 
 func (c *ConsumeHandler) Setup(session sarama.ConsumerGroupSession) error {
+	// 指定offset开启消费，需要满足 offset >= min_offset && offset <= max_offset，否则消费不成功
+	// session.ResetOffset("first", 1, 100, "3")
 	return nil
 }
 
@@ -34,6 +36,8 @@ func (c *ConsumeHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim
 			slog.Info(fmt.Sprintf("Msg claim: topic=%s, partition=%d, offset=%d, timestamp=%+v, key=%s, value=%s",
 				msg.Topic, msg.Partition, msg.Offset, msg.Timestamp, string(msg.Key), string(msg.Value)))
 			session.MarkMessage(msg, "")
+			// 手动提交offset，需要设置 cfg.Consumer.Offsets.AutoCommit.Enable = false
+			// session.Commit()
 		case <-session.Context().Done():
 			slog.Info("Consumer group session is closed")
 			return nil
@@ -41,14 +45,14 @@ func (c *ConsumeHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim
 	}
 }
 
-// 按 Topic 消费
+// 按Topic消费
 func ConsumeTopic(addr, topics []string, groupId string) error {
 	cfg := sarama.NewConfig()
 	cfg.Version = sarama.V3_7_1_0
 	cfg.Consumer.Offsets.Initial = sarama.OffsetNewest
 	cfg.Consumer.Offsets.AutoCommit.Enable = true
 	cfg.Consumer.Offsets.AutoCommit.Interval = time.Second
-	// 消费者分组分配策略 & Rebalance策略
+	// 消费者分组分配策略&Rebalance策略
 	cfg.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.NewBalanceStrategyRange()}
 
 	cg, err := sarama.NewConsumerGroup(addr, groupId, cfg)
